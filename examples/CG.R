@@ -8,7 +8,7 @@ source("../functions/MG_functions.R")
 sourceCpp("../functions/Rcpp_functions.cpp")
 
 ### data
-P <- 2
+P <- 3
 data <- read.csv( paste("../data/data_",P,"D.csv",sep=""), dec="," )
 X <- data[,1:P]
 y <- data$y

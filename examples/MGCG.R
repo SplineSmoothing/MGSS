@@ -45,7 +45,11 @@ for(g in 1:G){
 
 ### setup for matrix-free Jacobi-method (digonal and weight)
 diags <- lapply( 1:G, function(g) diag_kr_Rcpp_fct(Phi_t_list[[g]]) + rowSums(sapply( 1:nreg, function(j) diag_kron_Rcpp_fct(Psi_list[[g]][[j]]) ))  )
-w <- 0.2
+if(P==4){
+  w <- 0.1
+} else{
+  w <- 0.2
+}
 nu <- c(6,3)
 
 ### grid transfer matrices for g=2,...,G
