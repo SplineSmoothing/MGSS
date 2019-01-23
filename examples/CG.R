@@ -17,8 +17,6 @@ n <- length(y)
 ### parameter
 m <- rep(36,P)
 q <- rep(3,P)
-#J <- m+q+1
-#K <- prod(J)
 Omega <- lapply( 1:P, function(p) c(min(X[,p]),max(X[,p])) )
 
 ### basis matrices Phi_p^T
