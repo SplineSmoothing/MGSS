@@ -24,7 +24,7 @@ m <- rep(36,P)  # number of knots in spatial direction
 G <- 5    # number of grids
 m <- lapply( 1:G, function(g) rep(2^g-1,P) )
 ```
-Next, we assemble the required matrices and vectors:
+and assemble the required matrices and vectors:
 ```R
 ### For CG.R:
 Phi_t_list <- lapply(1:P, function(p) t(my_bs_matrix(X[,p],m[p],q[p],Omega[[p]])) )
