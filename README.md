@@ -11,7 +11,9 @@ Before running one of the algorithms install the required packages:
 * gaussquad
 * polynom
 * orthopolynom
-
+```R
+install.packages(c("Rcpp","gaussquad","combinat","polynom","orthopolynom"))
+```
 and set the dimesion:
 ```R
 P <- 3 #or 2 or 4
