@@ -6,11 +6,6 @@ Theses algorithms are:
 
 To test both of the algorithms in multiple dimensions, we provide test data in P dimensions (P=2,3,4) that is generated from a disturbed sigmoid function.
 Before running one of the algorithms install the required packages:
-* Rcpp (to run C++ code)
-* combinat
-* gaussquad
-* polynom
-* orthopolynom
 ```R
 install.packages(c("Rcpp","gaussquad","combinat","polynom","orthopolynom"))
 ```
