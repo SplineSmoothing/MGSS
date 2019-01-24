@@ -4,13 +4,15 @@ Theses algorithms are:
 * Matrix-free CG-method (CG.R)
 * Matrix-free MGCG-method (MGCG.R)
 
-To test both of the algorithms in multiple dimensions, we provide test data in P dimensions (P=2,3,4) that are generated from a disturbed sigmoid function.
+To test both of the algorithms in multiple dimensions, we provide test data in P dimensions (P=2,3,4) that is generated from a disturbed sigmoid function.
 Before running one of the algorithms install the required packages:
 * Rcpp (to run C++ code)
 * combinat
 * gaussquad
+* polynom
+* orthopolynom
 
-and set the the dimesion:
+and set the dimesion:
 ```R
 P <- 3 #or 2 or 4
 ```
