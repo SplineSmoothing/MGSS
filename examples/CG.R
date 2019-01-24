@@ -1,5 +1,6 @@
 
 ###
+install.packages(c("Rcpp","gaussquad","combinat","polynom","orthopolynom"))
 library(Rcpp)
 library(gaussquad)
 library(combinat)
