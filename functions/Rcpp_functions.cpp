@@ -6,7 +6,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-// MVP with Kronecker Matrix
+// MVP with Kronecker Matrix: Ax, with A = A_list_1 otimes ... otimes A_list_P
 NumericVector MVP_kron_Rcpp(const List& A_list, const NumericVector& x){
   
   int P=A_list.size();
@@ -85,13 +85,12 @@ NumericVector MVP_kron_Rcpp(const List& A_list, const NumericVector& x){
 }
 
 // [[Rcpp::export]]
-// MVP with Khatri-Rao Matrix
+// MVP with Khatri-Rao Matrix: Ax, with A = A_list_1 odot ... odot A_list_P with P leq 4
 NumericVector MVP_kr_Rcpp(const List& A_list, const NumericVector& x){
   
   int P=A_list.size();
   int n=x.size(); 
   int m=1;
-  //std::vector<int> m_p(P);
   NumericVector m_p(P);
   for(int p=0; p<P; p++){
     const NumericMatrix& A_p = A_list[p];
@@ -196,7 +195,7 @@ NumericVector MVP_kr_Rcpp(const List& A_list, const NumericVector& x){
 }
 
 // [[Rcpp::export]]
-// MVP with transposed Khatri-Rao Matrix
+// MVP with transposed Khatri-Rao Matrix: A_trans y, A_list_1 odot ... odot A_list_P with P leq 4
 NumericVector MVP_krtrans_Rcpp(const List& A_list, const NumericVector& y){
   
   int P=A_list.size();
@@ -311,7 +310,7 @@ NumericVector MVP_krtrans_Rcpp(const List& A_list, const NumericVector& y){
 }
 
 // [[Rcpp::export]]
-// Diagonal of A_1 otimes ... otimes A_P
+// Diagonal of Kronecker Matrix: diag_A, with A = A_1 otimes ... otimes A_P with P leq 4
 NumericVector diag_kron_Rcpp_fct(const List& A_list){
   
   int P = A_list.size();
@@ -388,7 +387,7 @@ NumericVector diag_kron_Rcpp_fct(const List& A_list){
 }
 
 // [[Rcpp::export]]
-// Diagonal of AA' with A = A_1 odot ... odot A_P
+// Diagonal of AA' with A = A_1 odot ... odot A_P with P leq 4
 NumericVector diag_kr_Rcpp_fct(const List& A_list){
   
   int P=A_list.size();

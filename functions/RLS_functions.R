@@ -73,17 +73,4 @@ my_TP_regularization = function(m,q,Omega){
   
 }
 
-### Difference Penalty
-my_diff_regularization = function(K_p,l,Omega){
-  
-  P <- length(K_p)
-  Delta <- lapply(1:P, function(p) diff(diag(K_p[p]),diff=l[p]))
-  Identity <- lapply(1:P, function(p) diag(K_p[p]))
-  Delta_list <- lapply(1:P, function(p) Identity)
-  for(p in 1:P){
-    Delta_list[[p]][[p]] <- t(Delta[[p]])%*%Delta[[p]]
-  }
-  return(Delta_list)
-  
-}
 
