@@ -59,30 +59,20 @@ Rest <- lapply( 2:G, function(g) lapply( 1:P, function(p) my_restriction(J[[g]][
 
 ### matrix-free MGCG
 alpha <- rep(0,K)
-res <- b
-norm_res <- sqrt(sum(res^2))
 max_iter <- 20
 tol <- 10^(-5)
-z <- my_vcycle(Phi_t_list, Psi_list, diags, Rest, Prol, b, nu, w)
-dir <- z
-for(i in 1:max_iter){
+for(k in 1:max_iter){
   
-  base <- MVP_kr_Rcpp( Phi_t_list[[G]], MVP_krtrans_Rcpp(Phi_t_list[[G]],dir) )
-  pen <- lapply( 1:nreg, function(j) MVP_kron_Rcpp(Psi_list[[G]][[j]],dir) )
-  Adir <- base + Reduce("+",pen)
-  zres_old <- crossprod(res,z)
-  a <- as.numeric( zres_old / ( crossprod(dir,Adir) ) )
-  alpha <- alpha + a*dir
-  res <- res - a*Adir
-  norm_res_rel <- sqrt(sum(res^2))/norm_b
-  cat(norm_res_rel,"\n")
-  if(norm_res_rel < tol){
+  alpha <- my_vcycle( Phi_t_list, Psi_list, diags, Rest, Prol, b, nu, w, alpha)
+  
+  base <- MVP_kr_Rcpp( Phi_t_list[[G]], MVP_krtrans_Rcpp(Phi_t_list[[G]],alpha) )
+  pen <- lapply( 1:nreg, function(j) MVP_kron_Rcpp(Psi_list[[G]][[j]],alpha) )
+  res <- b- (base + Reduce("+",pen))
+  res_rel <- sqrt(sum(res^2))/norm_b
+  cat(res_rel ,"\n")
+  if( res_rel < tol ){
     break
   }
-  z <- my_vcycle(Phi_t_list, Psi_list, diags, Rest, Prol, res, nu, w)
-  beta <- as.numeric( crossprod(z,res) / zres_old  )
-  dir <- z + beta*dir
   
 }
-
 
