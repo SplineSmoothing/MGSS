@@ -12,7 +12,7 @@ Psi_list <- curvature_penalty(m, q, Omega)                                      
 b <- MVP_khatrirao_rcpp(tPhi_list, y)                                                         # right-hand side vector
 ```
 The coefficients of the spline basis functions are determined via the solution of a linear system which is achieved by the CG-method.
-The key point is that the matrix-vector product with the coefficient matrix `A` are performed in a matrix-free manner, i.e. without explicitly assembling and storing the (too) large coefficient matrix but only the dimension specific matrices:
+The key point is that the matrix-vector products with the coefficient matrix `A` are performed in a matrix-free manner, i.e. without explicitly assembling and storing the (too) large coefficient matrix but only the dimension specific matrices:
 ```R
 Ad <- MVP_spline(tPhi_list, d) + lambda*MVP_penalty(Psi_list, d)
 ```
