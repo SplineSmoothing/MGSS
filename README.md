@@ -32,4 +32,16 @@ z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, r, nu, w)     # apply MG a
 Note that all operations within the multigrid cycle, i.e. restriction, prolongation, and Jacobi-smoothing, are performed matrix-free such that none of the (too) large matrices will ever exist.
 
 ## Results
+To evaluate the performance of the algorithms, they are tested on a rather simple data set in `P=3` dimensions
+```R
+P <- 3                                          # number of covariates
+n <- 100000                                     # number of observations
+X <- sapply(1:P, function(p) runif(n,0,1))      # covariates
+t <- sapply( 1:n, function(i) -16*( (sum(X[i,]^2) / length(X[i,])) -0.5) )
+fx <- 1 / ( 1 + exp(t) )
+y <- fx + rnorm(n, 0, 0.1)                      # observations
+```
+Storing the full coefficient matrix of the underlying system requires approximately 30 GB of RAM, which is at the limit of the most computer systems.
+The matrix-free approaches are, by construction, free of thoses memory limitations.
+The results are as follows:
 
