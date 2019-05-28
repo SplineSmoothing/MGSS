@@ -1,4 +1,9 @@
-# MGSS - A Multigrid Spline Smoothing Toolbox
+# MGSS: A Multigrid Spline Smoothing Toolbox
+Penalized splines is a popular method for function estimation under the assumption of smoothness and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory and computational complexity. This toolbox provides a matrix-free implementation of a geometric multigrid preconditioned conjugate gradient method for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data. Further details can be found in 
+
+
+
+
 This package provides matrix-free algorithms to determine smoothing splines with multiple covariates.
 The algorithms are:  
 * Matrix-free CG-method (CG.R)
