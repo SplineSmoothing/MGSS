@@ -45,8 +45,8 @@ Storing the full coefficient matrix of the underlying system requires approximat
 The matrix-free approaches are, by construction, free of thoses memory limitations.
 The results to reach an relative error of `<= 10^(-6)` are as follows:
 
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+|               | CG        | MGCG  |
+| ------------- |:---------:| :----:|
+| # iterations  | 1305      | 22    |
+| memory        | 16 MB     | 78 MB |
+
