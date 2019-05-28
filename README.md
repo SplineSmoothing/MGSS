@@ -43,5 +43,10 @@ y <- fx + rnorm(n, 0, 0.1)                      # observations
 ```
 Storing the full coefficient matrix of the underlying system requires approximately 30 GB of RAM, which is at the limit of the most computer systems.
 The matrix-free approaches are, by construction, free of thoses memory limitations.
-The results to reach an relative error of `< 10^(-6)` are as follows:
+The results to reach an relative error of `<= 10^(-6)` are as follows:
 
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
