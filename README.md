@@ -6,21 +6,21 @@ The manuals for the matrix-free CG-method (CG.R) and the matrix-free MGCG-method
 
 ### CG
 After selecting the spline parameters, the transposed B-spline basis matrix and the curavture penalty were assembled for each spatial direction `p=1,...,P`:
-```{r}
+```R
 tPhi_list <- lapply(1:P, function(p) t( bspline_matrix(X[,p], m[p], q[p] ,Omega[[p]]) ) )     # spline matrices
 Psi_list <- curvature_penalty(m, q, Omega)                                                    # curvature penalty
 b <- MVP_khatrirao_rcpp(tPhi_list, y)                                                         # right-hand side vector
 ```
 The coefficients of the spline basis functions are determined via the solution of a linear system which is achieved by the CG-method.
 The key point is that the matrix-vector product with the coefficient matrix `A` are performed in a matrix-free manner, i.e. without explicitly assembling and storing the (too) large coefficient matrix but only the dimension specific matrices:
-```{r}
+```R
 Ad <- MVP_spline(tPhi_list, d) + lambda*MVP_penalty(Psi_list, d)
 ```
 
 ### MGCG
 If the spatial dimension `P` is further increased, the CG-method will become computationally inefficient due to deteriorating condition of the system matrix. Therefore, an multigrid-like precondioner is implemented.
 After selecting the spline parameters and the number of utilized grids, the transposed B-spline basis matrix and the curavture penalty were assembled for each spatial direction `p=1,...,P` and each grid levele `g=1,...,G`:
-```{r}
+```R
 tPhi_list <- lapply(1:G, function(g) lapply(1:P, function(p) t( bspline_matrix(X[,p], m[[g]][p], q[p] ,Omega[[p]]) ) ) )    # spline matrices
 Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # survature penalty
 b <- MVP_khatrirao_rcpp(tPhi_list[[G]], y)      # right-hand side vector
