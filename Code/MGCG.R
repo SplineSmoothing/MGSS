@@ -15,8 +15,8 @@ sourceCpp("./Rcpp_functions.cpp")    # external C++ functions
 ##### simple test data
 
 set.seed(123)
-P <- 2                                          # number of covariates
-n <- 10000                                      # number of observations
+P <- 3                                          # number of covariates
+n <- 100000                                      # number of observations
 X <- sapply(1:P, function(p) runif(n,0,1))      # covariates
 t <- sapply( 1:n, function(i) -16*( (sum(X[i,]^2) / length(X[i,])) -0.5) )
 fx <- 1 / ( 1 + exp(t) )
