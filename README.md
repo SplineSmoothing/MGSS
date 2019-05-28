@@ -44,4 +44,7 @@ y <- fx + rnorm(n, 0, 0.1)                      # observations
 Storing the full coefficient matrix of the underlying system requires approximately 30 GB of RAM, which is at the limit of the most computer systems.
 The matrix-free approaches are, by construction, free of thoses memory limitations.
 The results are as follows:
-
+| Column 1       | Column 2     | Column 3     |
+| :------------- | :----------: | -----------: |
+|  Cell Contents | More Stuff   | And Again    |
+| You Can Also   | Put Pipes In | Like this \| |
