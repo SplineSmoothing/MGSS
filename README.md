@@ -19,53 +19,17 @@ Ad <- MVP_spline(tPhi_list, d) + lambda*MVP_penalty(Psi_list, d)
 
 ### MGCG
 If the spatial dimension `P` is further increased, the CG-method will become computationally inefficient due to deteriorating condition of the system matrix. Therefore, an multigrid-like precondioner is implemented.
-After selecting the spline parameters and the number of utilized grids, the transposed B-spline basis matrix and the curavture penalty were assembled for each spatial direction `p=1,...,P` and each grid levele `g=1,...,G`:
+After selecting the spline parameters and the number of utilized grids, the transposed B-spline basis matrix and the curavture penalty were assembled for each spatial direction `p=1,...,P` and each grid level `g=1,...,G`:
 ```R
 tPhi_list <- lapply(1:G, function(g) lapply(1:P, function(p) t( bspline_matrix(X[,p], m[[g]][p], q[p] ,Omega[[p]]) ) ) )    # spline matrices
 Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # survature penalty
 b <- MVP_khatrirao_rcpp(tPhi_list[[G]], y)      # right-hand side vector
 ```
-
-
-
-
-## old
-
-To test the algorithms in multiple dimensions, we provide test data in P dimensions (P=2,3,4) that is generated from a disturbed sigmoid function.
-Before running one of the algorithms install the required packages:
+The coefficients of the spline basis functions are determined via the solution of a linear system which is achieved by the preconditioned CG-method where the `v_cycle` is used as preconditioner:
 ```R
-install.packages(c("Rcpp","gaussquad","combinat","polynom","orthopolynom"))
+z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, r, nu, w)     # apply MG as preconditioner
 ```
-and set the dimesion:
-```R
-P <- 3 #or 2 or 4
-```
-As a next step, fix the spline parameters:
-```R
-q <- rep(3,P)   # spline degree in spatial direction
+Note that all operations within the multigrid cycle, i.e. restriction, prolongation, and Jacobi-smoothing, are performed matrix-free such that none of the (too) large matrices will ever exist.
 
-### For CG.R
-m <- rep(36,P)  # number of knots in spatial direction
+## Results
 
-### For MG.R and MGCG.R
-G <- 5    # number of grids
-m <- lapply( 1:G, function(g) rep(2^g-1,P) )
-```
-and assemble the required matrices and vectors:
-```R
-### For CG.R:
-Phi_t_list <- lapply(1:P, function(p) t(my_bs_matrix(X[,p],m[p],q[p],Omega[[p]])) )
-Psi_list <- my_TP_regularization(m,q,Omega)
-b <- MVP_kr_Rcpp(Phi_t_list,y)
-
-### For MG.R and MGCG.R
-Phi_t_list <- lapply( 1:G, function(g) lapply( 1:P, function(p) t(my_bs_matrix(X[,p],m[[g]][p],q[p],Omega[[p]])) ) )
-Psi_list <- lapply( 1:G, function(g) my_TP_regularization(m[[g]],q,Omega) )
-b <- MVP_kr_Rcpp(Phi_t_list[[G]],y)
-```
-Note that for the CG.R method, other basis and penalty matrices can be used as well.
-We manually set the smoothing parameter:
-```R
-lambda <- 0.2
-```
-and finally solve the considered large-scale linear system with one of the preoposed algorithms.
