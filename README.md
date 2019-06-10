@@ -1,5 +1,5 @@
 # MGSS: A Multigrid Spline Smoothing Toolbox
-Penalized splines is a popular method for function estimation under the assumption of smoothness and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient method (CG.R) for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data as well as preconditioned version (MGCG.R) where a geometric multigrid preconditioner is applied. Further details can be found in [Siebenborn and Wagner, 2019](https://arxiv.org/abs/1901.00654).
+The penalized spline (P-spline) method is a popular tool for data smoothing and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient method (CG.R) for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data as well as preconditioned version (MGCG.R) where a geometric multigrid preconditioner is applied. Further details can be found in [Siebenborn and Wagner, 2019](https://arxiv.org/abs/1901.00654).
 
 ## Manual
 The manuals for the matrix-free CG-method (CG.R) and the matrix-free MGCG-method (MGCG.R) are provided.
@@ -19,7 +19,7 @@ Ad <- MVP_spline(tPhi_list, d) + lambda*MVP_penalty(Psi_list, d)
 
 ### MGCG
 If the spatial dimension `P` is further increased, the CG-method will become computationally inefficient due to deteriorating condition of the system matrix. Therefore, an multigrid-like precondioner is implemented.
-After selecting the spline parameters and the number of utilized grids, the transposed B-spline basis matrix and the curavture penalty were assembled for each spatial direction `p=1,...,P` and each grid level `g=1,...,G`:
+After selecting the spline parameters and the number of utilized grids, the transposed B-spline basis matrix and the curvature penalty were assembled for each spatial direction `p=1,...,P` and each grid level `g=1,...,G`:
 ```R
 tPhi_list <- lapply(1:G, function(g) lapply(1:P, function(p) t( bspline_matrix(X[,p], m[[g]][p], q[p] ,Omega[[p]]) ) ) )    # spline matrices
 Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # survature penalty
