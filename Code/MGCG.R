@@ -9,7 +9,7 @@ library(Rcpp)                        # incorporate C++
 
 source("./spline_functions.R")       # external R functions for P-splines
 source("./multigrid_functions.R")    # external R functions for multigrid method
-sourceCpp("./Rcpp_functions.cpp")    # external C++ functions
+sourceCpp("./rcpp_functions.cpp")    # external C++ functions
 
 #####--------------------------------------------
 ##### simple test data
@@ -29,10 +29,10 @@ G <- 5                                          # number of grids for multigrid
 m <- lapply( 1:G, function(g) rep(2^g-1,P) )    # number of spline knots
 q <- rep(3, P)                                  # spline degree
 Omega <- lapply(1:P, function(p) c(0,1) )       # underlying space
-J <- lapply(1:G, function(g) m[[g]]+q+1)        # number of directionla basis functions
+J <- lapply(1:G, function(g) m[[g]]+q+1)        # number of directional basis functions
 K <- prod(J[[G]])                               # total number of basis functions
 tPhi_list <- lapply(1:G, function(g) lapply(1:P, function(p) t( bspline_matrix(X[,p], m[[g]][p], q[p] ,Omega[[p]]) ) ) )    # spline matrices
-Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # survature penalty
+Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # curvature penalty
 b <- MVP_khatrirao_rcpp(tPhi_list[[G]], y)      # right-hand side vector
 norm_b <- sqrt( sum(b^2) )
 lambda <- 10                                    # weight of the regularization (manually)
