@@ -8,8 +8,6 @@ A train and test data set with `n` samples in `P` dimensions is generated via th
 ### Generate data (train + test)
 
 ```R
-#####--------------------------------------------
-##### generate data (train + test)
 n <- 100000
 P <- 3
 data <- generate_test_data(n, P)
@@ -19,8 +17,6 @@ y_train <- data$y_train
 ### Setup of spline and regularization parameters
 
 ```R
-#####--------------------------------------------
-##### 
 G <- 5
 m <- rep(2^G-1, P)
 q <- rep(3, P)
