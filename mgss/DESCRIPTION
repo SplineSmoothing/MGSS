@@ -2,8 +2,8 @@ Package: mgss
 Type: Package
 Title: A Matrix-Free Multigrid Preconditioner for Spline Smoothing
 Version: 1.0
-Author: Martin Siebenborn <martin.siebenborn@uni-hamburg.de>, Julian Wagner
-Maintainer: Martin Siebenborn <martin.siebenborn@uni-hamburg.de>
+Author: Martin Siebenborn, Julian Wagner
+Maintainer: Martin Siebenborn
 Description: Data smoothing with penalized splines is a popular method and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient (CG) method for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data. It further provides matrix-free preconditioned versions of the CG-algorithm where the user can choose between a simpler diagonal precondtiotioner and an advanced geometric multigrid preconditioner. The main advantage is that all algorithms are performed matrix-free and therefore require only small amount of memory. For further detail see Siebenborn & Wagner (2019) <arxiv:1901.00654>.
 URL: https://arxiv.org/abs/1901.00654
 License: MIT + file LICENSE
