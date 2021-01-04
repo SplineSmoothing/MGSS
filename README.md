@@ -1,52 +1,65 @@
-# MGSS: A Multigrid Spline Smoothing Toolbox
-The penalized spline (P-spline) method is a popular tool for data smoothing and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient method (CG.R) for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data as well as preconditioned version (MGCG.R) where a geometric multigrid preconditioner is applied. Further details can be found in [Siebenborn and Wagner, 2019](https://arxiv.org/abs/1901.00654).
+# MGSS: A Matrix-Free Multigrid Preconditioner for Spline Smoothing
+Data smoothing with penalized splines is a popular method and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient (CG) method for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data. It further provides matrix-free preconditioned versions of the CG-algorithm where the user can choose between a simpler diagonal precondtiotioner and an advanced geometric multigrid preconditioner. The main advantage is that all algorithms are performed matrix-free and therefore require only small amount of memory. For further detail see Siebenborn & Wagner (2019) <arxiv:1901.00654>.
 
-## Manual
-The manuals for the matrix-free CG-method (CG.R) and the matrix-free MGCG-method (MGCG.R) are provided.
+## Demo
+The demo code allows to choose between a pure CG and a multigrid preconditioned CG solver.
+A train and test data set with `n` samples in `P` dimensions is generated via the function `data <- generate_test_data(n, P)`.
 
-### CG
-After selecting the spline parameters, the transposed B-spline basis matrix and the curavture penalty were assembled for each spatial direction `p=1,...,P`:
+### Generate data (train + test)
+
 ```R
-tPhi_list <- lapply(1:P, function(p) t( bspline_matrix(X[,p], m[p], q[p] ,Omega[[p]]) ) )     # spline matrices
-Psi_list <- curvature_penalty(m, q, Omega)                                                    # curvature penalty
-b <- MVP_khatrirao_rcpp(tPhi_list, y)                                                         # right-hand side vector
+#####--------------------------------------------
+##### generate data (train + test)
+n <- 100000
+P <- 3
+data <- generate_test_data(n, P)
+X_train <- data$X_train
+y_train <- data$y_train
 ```
-The coefficients of the spline basis functions are determined via the solution of a linear system which is achieved by the CG-method.
-The key point is that the matrix-vector products with the coefficient matrix `A` are performed in a matrix-free manner, i.e. without explicitly assembling and storing the (too) large coefficient matrix but only the dimension specific matrices:
+### Setup of spline and regularization parameters
+
 ```R
-Ad <- MVP_spline(tPhi_list, d) + lambda*MVP_penalty(Psi_list, d)
+#####--------------------------------------------
+##### 
+G <- 5
+m <- rep(2^G-1, P)
+q <- rep(3, P)
+#penalty_type <- "curve"
+penalty_type <- "diff"
+
+lambda <- 0.1
+```
+### Solver selection
+
+```R
+#model <- CG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type, tolerance = 0.1)
+#model <- PCG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type)
+model <- MGCG_smooth(G, q, lambda, X_train, y_train, tolerance = 0.1)
 ```
 
-### MGCG
-If the spatial dimension `P` is further increased, the CG-method will become computationally inefficient due to deteriorating condition of the system matrix. Therefore, an multigrid-like precondioner is implemented.
-After selecting the spline parameters and the number of utilized grids, the transposed B-spline basis matrix and the curvature penalty were assembled for each spatial direction `p=1,...,P` and each grid level `g=1,...,G`:
-```R
-tPhi_list <- lapply(1:G, function(g) lapply(1:P, function(p) t( bspline_matrix(X[,p], m[[g]][p], q[p] ,Omega[[p]]) ) ) )    # spline matrices
-Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # survature penalty
-b <- MVP_khatrirao_rcpp(tPhi_list[[G]], y)      # right-hand side vector
-```
-The coefficients of the spline basis functions are determined via the solution of a linear system which is achieved by the preconditioned CG-method where the `v_cycle` is used as preconditioner:
-```R
-z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, r, nu, w)     # apply MG as preconditioner
-```
-Note that all operations within the multigrid cycle, i.e. restriction, prolongation, and Jacobi-smoothing, are performed matrix-free such that none of the (too) large matrices will ever exist.
+#### Model performance on training data
 
-## Results
-To evaluate the performance of the algorithms, they are tested on a rather simple data set in `P=3` dimensions
 ```R
-P <- 3                                          # number of covariates
-n <- 100000                                     # number of observations
-X <- sapply(1:P, function(p) runif(n,0,1))      # covariates
-t <- sapply( 1:n, function(i) -16*( (sum(X[i,]^2) / length(X[i,])) -0.5) )
-fx <- 1 / ( 1 + exp(t) )
-y <- fx + rnorm(n, 0, 0.1)                      # observations
+model$rmse
+model$R_squared
+n <- length(y_train)
+res <- model$residuals
+RSS <- sum(res^2)
+df <- estimate_trace(m, q, lambda, X_train, pen_type = penalty_type)
+AIC <- log(RSS) + 2*df/n
+AIC_C <- log(RSS) + 2*(df+1) / (n-df-2)
 ```
-Storing the full coefficient matrix of the underlying system requires approximately 30 GB of RAM, which is at the limit of the most computer systems.
-The matrix-free approaches are, by construction, free of thoses memory limitations.
-The results to reach an relative error of `<= 10^(-6)` are as follows:
 
-|               | CG        | MGCG  |
-| ------------- |:---------:| :----:|
-| # iterations  | 1305      | 22    |
-| memory        | 16 MB     | 78 MB |
+#### New predictions on test data and model validation
+```R
+X_test <- data$X_test
+y_test <- data$y_test
 
+y_pred <- predict_smooth(model, X_test)
+res <- y_pred - y_test
+RSS <- sum(res^2)
+mean_res <- mean(res)
+sd_res <- sd(res)
+rmse <- sqrt( mean( res^2 ) )
+R_squared <- 1 - ( sum(res^2) / sum( (y_test-mean(y_test))^2 ) )
+```
