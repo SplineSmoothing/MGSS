@@ -14,6 +14,12 @@
 #' @param print_error Logical, indicating if the iteration error should be printed or not.
 #' @return Returns a list containing the input \code{m}, \code{q}, and \code{Omega}. Further gives the fitted spline coefficients \code{alpha}, the fitted values \code{fitted_values}, the residuals \code{residuals}, the root mean squared error \code{rmse} and the R-squared value \code{R_squared}.  
 #'
+#' @examples
+#' data <- generate_test_data(100, 2)
+#' X <- data$X_train
+#' y <- data$y_train
+#' CG_smooth(m = c(7,7), q = c(3,3), lambda = 0.1, X = X, y = y)
+#'
 #' @export
 CG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_start = NULL, K_max = NULL, tolerance = 1e-6, print_error = TRUE){
   
@@ -126,6 +132,12 @@ CG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_st
 #' @param tolerance Positive number as error tolerance for the stopping criterion of the PCG-method. Defaults to \code{1e-6}.
 #' @param print_error Logical, indicating if the iteration error should be printed or not.
 #' @return Returns a list containing the input \code{m}, \code{q}, and \code{Omega}. Further gives the fitted spline coefficients \code{alpha}, the fitted values \code{fitted_values}, the residuals \code{residuals}, the root mean squared error \code{rmse} and the R-squared value \code{R_squared}.  
+#'
+#' @examples
+#' data <- generate_test_data(100, 2)
+#' X <- data$X_train
+#' y <- data$y_train
+#' PCG_smooth(m = c(7,7), q = c(3,3), lambda = 0.1, X = X, y = y)
 #'
 #' @export
 PCG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_start = NULL, K_max = NULL, tolerance = 1e-6, print_error = TRUE){
@@ -259,6 +271,12 @@ PCG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_s
 #'
 #' @references Siebenborn, M. and Wagner, J. (2019) A Multigrid Preconditioner for Tensor Product Spline Smoothing. arXiv:1901.00654
 #'
+#' @examples
+#' data <- generate_test_data(100, 2)
+#' X <- data$X_train
+#' y <- data$y_train
+#' MGCG_smooth(G = 3, q = c(3,3), lambda = 0.1, w = 0.8, X = X, y = y)
+#'
 #' @export
 MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = NULL, K_max = NULL, tolerance = 1e-6, print_error = TRUE){
   
@@ -359,6 +377,14 @@ MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = 
 #' @param model_smooth A spline model resulting from \code{CG_smooth}, \code{PCG_smooth}, or \code{MGCG_smooth}.
 #' @param X Matrix containing the new observations.
 #' @return Vector of length \code{nrow(X)} of predictions.
+#' 
+#' @examples
+#' data <- generate_test_data(100, 2)
+#' X <- data$X_train
+#' y <- data$y_train
+#' result <- PCG_smooth(m = c(7,7), q = c(3,3), lambda = 0.1, X = X, y = y, print_error = FALSE)
+#' X_test <- data$X_test
+#' predict_smooth(model_smooth = result, X = X_test)
 #'
 #' @export
 predict_smooth <- function(model_smooth, X){
@@ -384,11 +410,15 @@ predict_smooth <- function(model_smooth, X){
 #' @param pen_type Utilized penalization method. Either \code{"curve"} for the curvature penalty or \code{"diff"} for the difference penalty. Defaults to \code{"curve"}.
 #' @param l Positive integer vector of length \code{P} indicating for the penalty degree. Only required if \code{pen_type = "diff"}.
 #' @param n_random Positive integer for the number of random vectors in the trace estimate. Defaults to \code{5}.
-#' @param seed Positive integer for the seed. For reproducibility of the stochastic trace estimate. Defaults to \code{123}.
 #' @return An estimate of the trace of the hat-matrix.
+#' 
+#' @examples
+#' data <- generate_test_data(100, 2)
+#' X <- data$X_train
+#' estimate_trace(m = c(7,7), q = c(2,2), lambda = 0.1, X = X)
 #'
 #' @export
-estimate_trace <- function(m, q, lambda, X, pen_type = "curve", l = NULL, n_random = 5, seed = 123){
+estimate_trace <- function(m, q, lambda, X, pen_type = "curve", l = NULL, n_random = 5){
   
   ### check for valid input parameter
   if( !is.vector(m) | any(m<0) ){ cat("Error: m has to be an integer vector \n") ; return(NULL) }
@@ -423,8 +453,7 @@ estimate_trace <- function(m, q, lambda, X, pen_type = "curve", l = NULL, n_rand
   
   
   ### Trace estimation
-  set.seed(seed)
-  V <- sapply(1:n_random, function(i) sample(c(-1,1), K, replace=T) )
+  V <- sapply(1:n_random, function(i) sample(c(-1,1), K, replace=TRUE) )
   V1 <- sapply(1:n_random, function(i) lambda*MVP_penalty(Psi_list, V[,i], pen_type = pen_type) )
   V2 <- sapply(1:n_random, function(i) solve_PCG(tPhi_list, Psi_list, lambda, V1[,i], pen_type = pen_type) )
   trace <- K - mean( sapply(1:n_random, function(i) crossprod(V[,i],V2[,i])) )

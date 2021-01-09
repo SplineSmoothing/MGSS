@@ -6,6 +6,9 @@
 #' @param split A value between \code{0} and \code{1} for the train / test split.
 #' @return A list of the covarite matrices for the train and test data \code{X_train} and \code{X_test} and of the variable of interest \code{y_train} and \code{y_test}.
 #'
+#' @examples
+#' generate_test_data(100, 2)
+#'
 #' @export
 generate_test_data <- function(n, P, split = 0.8){
   
@@ -18,7 +21,6 @@ generate_test_data <- function(n, P, split = 0.8){
   
   
   ### generate data (sigmoid function)
-  set.seed(42)
   X <- sapply(1:P, function(p) stats::runif(n,0,1))
   t <- sapply( 1:n, function(i) -16*( (sum(X[i,]^2) / length(X[i,])) -0.5) )
   fx <- 1 / ( 1 + exp(t) )

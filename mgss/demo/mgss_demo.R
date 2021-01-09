@@ -2,20 +2,21 @@ library(mgss)
 
 #####--------------------------------------------
 ##### generate data (train + test)
-n <- 100000
-P <- 3
-data <- generate_test_data(n, P)
+data <- generate_test_data(100, 2)
 X_train <- data$X_train
 y_train <- data$y_train
+P <- ncol(X_train)
+
 
 #####--------------------------------------------
 ##### Setup of spline parameters
 #P <- ncol(X_train)
-G <- 5
+G <- 3
 m <- rep(2^G-1, P)
 q <- rep(3, P)
-#penalty_type <- "curve"
-penalty_type <- "diff"
+penalty_type <- "curve"
+#penalty_type <- "diff"
+
 
 #####--------------------------------------------
 ##### regularization parameter
@@ -24,9 +25,9 @@ lambda <- 0.1
 
 #####--------------------------------------------
 ##### Provided algorithms
-#model <- CG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type, tolerance = 0.1)
+#model <- CG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type)
 #model <- PCG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type)
-model <- MGCG_smooth(G, q, lambda, X_train, y_train, tolerance = 0.1)
+model <- MGCG_smooth(G = 3, q, lambda, X_train, y_train, w = 0.8)
 
 
 #####--------------------------------------------
@@ -36,7 +37,7 @@ model$R_squared
 n <- length(y_train)
 res <- model$residuals
 RSS <- sum(res^2)
-df <- estimate_trace(m, q, lambda, X_train, pen_type = penalty_type)
+df <- estimate_trace(m, q, lambda, X_train, pen_type = penalty_type, n_random = 25)
 AIC <- log(RSS) + 2*df/n
 AIC_C <- log(RSS) + 2*(df+1) / (n-df-2)
 
