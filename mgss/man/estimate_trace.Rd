@@ -4,16 +4,7 @@
 \alias{estimate_trace}
 \title{Trace estimation of the hat matrix.}
 \usage{
-estimate_trace(
-  m,
-  q,
-  lambda,
-  X,
-  pen_type = "curve",
-  l = NULL,
-  n_random = 5,
-  seed = 123
-)
+estimate_trace(m, q, lambda, X, pen_type = "curve", l = NULL, n_random = 5)
 }
 \arguments{
 \item{m}{Vector of non-negative integers. Each entry gives the number of inner knots for the respective covariate.}
@@ -29,12 +20,16 @@ estimate_trace(
 \item{l}{Positive integer vector of length \code{P} indicating for the penalty degree. Only required if \code{pen_type = "diff"}.}
 
 \item{n_random}{Positive integer for the number of random vectors in the trace estimate. Defaults to \code{5}.}
-
-\item{seed}{Positive integer for the seed. For reproducibility of the stochastic trace estimate. Defaults to \code{123}.}
 }
 \value{
 An estimate of the trace of the hat-matrix.
 }
 \description{
 Estimates the trace of the (unknown) hat-matrix by stochastic estimation in a matrix-free manner.
+}
+\examples{
+data <- generate_test_data(100, 2)
+X <- data$X_train
+estimate_trace(m = c(7,7), q = c(2,2), lambda = 0.1, X = X)
+
 }

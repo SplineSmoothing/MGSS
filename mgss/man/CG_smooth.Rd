@@ -47,3 +47,10 @@ Returns a list containing the input \code{m}, \code{q}, and \code{Omega}. Furthe
 \description{
 Fits a smooth spline to a set of given observations using penalized splines with curvature or difference penalty and multiple covariates. The underlying linear system is solved with a matrix-free conjugated gradient (CG) method.
 }
+\examples{
+data <- generate_test_data(100, 2)
+X <- data$X_train
+y <- data$y_train
+CG_smooth(m = c(7,7), q = c(3,3), lambda = 0.1, X = X, y = y)
+
+}

@@ -47,6 +47,13 @@ Returns a list containing the input \code{m = 2^G-1}, \code{q}, and \code{Omega}
 \description{
 Fits a smooth spline to a set of given observations using penalized splines with curvature penalty and multiple covariates. The underlying linear system is solved with a matrix-free preconditioned conjugated gradient method using a geometric multigrid method as preconditioner.
 }
+\examples{
+data <- generate_test_data(100, 2)
+X <- data$X_train
+y <- data$y_train
+MGCG_smooth(G = 3, q = c(3,3), lambda = 0.1, w = 0.8, X = X, y = y)
+
+}
 \references{
 Siebenborn, M. and Wagner, J. (2019) A Multigrid Preconditioner for Tensor Product Spline Smoothing. arXiv:1901.00654
 }

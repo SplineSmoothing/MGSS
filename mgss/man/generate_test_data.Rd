@@ -19,3 +19,7 @@ A list of the covarite matrices for the train and test data \code{X_train} and \
 \description{
 Generate a \code{P}-dimensional test data set based on a sigmoid function.
 }
+\examples{
+generate_test_data(100, 2)
+
+}

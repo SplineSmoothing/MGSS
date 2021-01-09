@@ -17,3 +17,12 @@ Vector of length \code{nrow(X)} of predictions.
 \description{
 Makes predictions of new observations from a fitted spline model.
 }
+\examples{
+data <- generate_test_data(100, 2)
+X <- data$X_train
+y <- data$y_train
+result <- PCG_smooth(m = c(7,7), q = c(3,3), lambda = 0.1, X = X, y = y, print_error = FALSE)
+X_test <- data$X_test
+predict_smooth(model_smooth = result, X = X_test)
+
+}
