@@ -24,7 +24,7 @@ restriction_matrix <- function(K_fine, K_coarse, q){
 
 #####--------------------------------------------
 ##### matrix-free PCG method with diagonal preconditioner
-solve_PCG <- function(tPhi_list, Psi_list, lambda, b, pen_type = "curve", tolerance = 1e-2){
+solve_PCG <- function(tPhi_list, Psi_list, lambda, b, pen_type = "curve", tolerance = 1e-8){
   
   ### diagonal preconditioner
   diag_spline <- diag_khatrirao_rcpp(tPhi_list)
@@ -78,7 +78,7 @@ solve_PCG <- function(tPhi_list, Psi_list, lambda, b, pen_type = "curve", tolera
 
 #####----------------------------------------------------------------------------------------------------------------
 #####  matrix-free Jacobi as smoothing iteration
-smooth_jacobi <- function(tPhi_list, Psi_list, lambda, b, k_max, w=1, a=rep(0,length(b)), tol=10^(-8) ){
+smooth_jacobi <- function(tPhi_list, Psi_list, lambda, b, k_max, w = 1, a = rep(0,length(b)), tol = 1e-8 ){
   
   # Parameter
   diag_A <- diag_khatrirao_rcpp(tPhi_list) + lambda*rowSums(sapply( 1:length(Psi_list), function(j) diag_kronecker_rcpp(Psi_list[[j]]) ) )
@@ -109,25 +109,26 @@ smooth_jacobi <- function(tPhi_list, Psi_list, lambda, b, k_max, w=1, a=rep(0,le
 
 #####----------------------------------------------------------------------------------------------------------------
 #####  matrix-free v-cycle (with Jacobi smoother and CG coarse grid solver)
-v_cycle <- function(tPhi_list, Psi_list, Rest, Prol, lambda, b, nu, w=1, a=rep(0,length(b)) ){
+v_cycle <- function(tPhi_list, Psi_list, Rest, Prol, lambda, b, nu, U_chol, w = 1, a = rep(0,length(b)) ){
   
   g <- length(tPhi_list)
-    if(g==1){
-    
-    z <- solve_PCG(tPhi_list[[g]], Psi_list[[g]], lambda, b)
-
+  if(g==1){
+    if(is.logical(U_chol)){    
+      z <- solve_PCG(tPhi_list[[g]], Psi_list[[g]], lambda, b)
+      return(z)
+    } else{
+      z <- forwardsolve(t(U_chol), as.vector(b) )
+      return( backsolve(U_chol, z) )
+    }
   } else{
-    
     a <- smooth_jacobi(tPhi_list[[g]], Psi_list[[g]], lambda, b, nu[1], w, a )
     Aa <- MVP_spline(tPhi_list[[g]], a) + lambda*MVP_penalty(Psi_list[[g]], a)
     e <- b - Aa
     r <- MVP_kronecker_rcpp(Rest[[g-1]], e)
-    e <- v_cycle(tPhi_list[1:(g-1)], Psi_list[1:(g-1)], Rest[1:(g-1)], Prol[1:(g-1)], lambda, r, nu, w )
+    e <- v_cycle(tPhi_list[1:(g-1)], Psi_list[1:(g-1)], Rest[1:(g-1)], Prol[1:(g-1)], lambda, r, nu, U_chol, w )
     a <- a + MVP_kronecker_rcpp( Prol[[g-1]], e )
     a <- smooth_jacobi(tPhi_list[[g]], Psi_list[[g]], lambda, b, nu[2], w, a )
-    
   }
-  
   return(as.vector(a))
   
 }

@@ -6,12 +6,12 @@
 \alias{mgss-package}
 \title{mgss: A Matrix-Free Multigrid Preconditioner for Spline Smoothing}
 \description{
-Data smoothing with penalized splines is a popular method and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory requirements and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient (CG) method for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data. It further provides matrix-free preconditioned versions of the CG-algorithm where the user can choose between a simpler diagonal preconditioner and an advanced geometric multigrid preconditioner. The main advantage is that all algorithms are performed matrix-free and therefore require only a small amount of memory. For further detail see Siebenborn & Wagner (2019) <arXiv:1901.00654>.
+Data smoothing with penalized splines is a popular method and is well established for one- or two-dimensional covariates. The extension to multiple covariates is straightforward but suffers from exponentially increasing memory requirements and computational complexity. This toolbox provides a matrix-free implementation of a conjugate gradient (CG) method for the regularized least squares problem resulting from tensor product B-spline smoothing with multivariate and scattered data. It further provides matrix-free preconditioned versions of the CG-algorithm where the user can choose between a simpler diagonal preconditioner and an advanced geometric multigrid preconditioner. The main advantage is that all algorithms are performed matrix-free and therefore require only a small amount of memory. For further detail see Siebenborn & Wagner (2021).
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://arxiv.org/abs/1901.00654}
+  \item \url{https://doi.org/10.1007/s00180-021-01104-4}
   \item Report bugs at \url{https://github.com/SplineSmoothing/MGSS}
 }
 

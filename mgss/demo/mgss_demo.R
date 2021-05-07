@@ -27,7 +27,7 @@ lambda <- 0.1
 ##### Provided algorithms
 #model <- CG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type)
 #model <- PCG_smooth(m, q, lambda, X_train, y_train, pen_type = penalty_type)
-model <- MGCG_smooth(G = 3, q, lambda, X_train, y_train, w = 0.8)
+model <- MGCG_smooth(G, q, lambda, X_train, y_train, w = 0.8)
 
 
 #####--------------------------------------------

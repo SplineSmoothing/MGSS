@@ -15,11 +15,12 @@ MGCG_smooth(
   alpha_start = NULL,
   K_max = NULL,
   tolerance = 1e-06,
-  print_error = TRUE
+  print_error = TRUE,
+  coarse_grid_solver = "Cholesky"
 )
 }
 \arguments{
-\item{G}{Positive integer for the maximum number of grids.}
+\item{G}{Positive integer greater than one for the maximum number of grids.}
 
 \item{q}{Vector of positive integers. Each entry gives the spline degree for the respective covariate.}
 
@@ -40,6 +41,8 @@ MGCG_smooth(
 \item{tolerance}{Positive number as error tolerance for the stopping criterion of the MGCG-method. Defaults to \code{1e-6}.}
 
 \item{print_error}{Logical, indicating if the iteration error should be printed or not.}
+
+\item{coarse_grid_solver}{Utilized coarse grid solver. Either \code{"PCG"} for diagonal preconditioned CG or \code{"Cholesky"} for Cholesky decomposition. Defaults to \code{"Cholesky"}.}
 }
 \value{
 Returns a list containing the input \code{m = 2^G-1}, \code{q}, and \code{Omega}. Further gives the fitted spline coefficients \code{alpha}, the fitted values \code{fitted_values}, the residuals \code{residuals}, the root mean squared error \code{rmse} and the R-squared value \code{R_squared}.

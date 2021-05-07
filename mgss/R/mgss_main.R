@@ -256,7 +256,7 @@ PCG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_s
 #' @title High-dimensional spline smoothing using a matrix-free multigrid preconditioned CG-method.
 #' @description Fits a smooth spline to a set of given observations using penalized splines with curvature penalty and multiple covariates. The underlying linear system is solved with a matrix-free preconditioned conjugated gradient method using a geometric multigrid method as preconditioner.
 #'
-#' @param G Positive integer for the maximum number of grids.
+#' @param G Positive integer greater than one for the maximum number of grids.
 #' @param q Vector of positive integers. Each entry gives the spline degree for the respective covariate.
 #' @param lambda Positive number as weight for the penalty term.
 #' @param X Matrix containing the covariates as columns and the units as rows.
@@ -267,6 +267,7 @@ PCG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_s
 #' @param K_max Positive integer as upper bound for the number of MGCG-iterations. Defaults to \code{prod(m+q+1)}.
 #' @param tolerance Positive number as error tolerance for the stopping criterion of the MGCG-method. Defaults to \code{1e-6}.
 #' @param print_error Logical, indicating if the iteration error should be printed or not.
+#' @param coarse_grid_solver Utilized coarse grid solver. Either \code{"PCG"} for diagonal preconditioned CG or \code{"Cholesky"} for Cholesky decomposition. Defaults to \code{"Cholesky"}.
 #' @return Returns a list containing the input \code{m = 2^G-1}, \code{q}, and \code{Omega}. Further gives the fitted spline coefficients \code{alpha}, the fitted values \code{fitted_values}, the residuals \code{residuals}, the root mean squared error \code{rmse} and the R-squared value \code{R_squared}.  
 #'
 #' @references Siebenborn, M. and Wagner, J. (2019) A Multigrid Preconditioner for Tensor Product Spline Smoothing. arXiv:1901.00654
@@ -277,18 +278,19 @@ PCG_smooth <- function(m, q, lambda, X, y, pen_type = "curve", l = NULL, alpha_s
 #' y <- data$y_train
 #' MGCG_smooth(G = 3, q = c(3,3), lambda = 0.1, w = 0.8, X = X, y = y)
 #'
+#' @importFrom Matrix Matrix KhatriRao t
 #' @export
-MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = NULL, K_max = NULL, tolerance = 1e-6, print_error = TRUE){
+MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = NULL, K_max = NULL, tolerance = 1e-6, print_error = TRUE, coarse_grid_solver = "Cholesky"){
   
   ### check for valid input parameter
-  if( !is.vector(G) | length(G) > 1 | G < 1  ){ cat("Error: G has to be a an integer \n") ; return(NULL) }
+  if( !is.vector(G) | length(G) > 1 | G < 2  ){ cat("Error: G has to be a an integer greater than 1 - For G=1 use PCG_smooth instead \n") ; return(NULL) }
   if( !is.vector(q) ){ cat("Error: q has to be a vector \n") ; return(NULL) }
   if( !is.vector(lambda) | length(lambda) > 1 | lambda <= 0 ){ cat("Error: lambda has to be a number greater than 0 \n") ; return(NULL) }
   if( !is.matrix(X) ){ cat("Error: X has to be a matrix \n") ; return(NULL) }
   if( ncol(X) != length(q) ){ cat("Error: number of columns of X differs to the length of q \n") ; return(NULL) }
   if( !is.vector(y) ){ cat("Error: y has to be a vector \n") ; return(NULL) }
   if( nrow(X) != length(y) ){ cat("Error: number of rows of X differs to the length of y \n") ; return(NULL) }
-  if( !is.vector(w) | length(w) > 1 | w <= 0 | w >= 1  ){ cat("Error: w has to be number between 0 and 1 \n") ; return(NULL) }
+  if( !is.vector(w) | length(w) > 1 | w <= 0 | w > 1  ){ cat("Error: w has to be number between 0 and 1 \n") ; return(NULL) }
   if( !is.vector(nu) | length(nu) != 2 | any(nu<0) ){ cat("Error: nu has to be a two-dimensional integer vector \n") ; return(NULL) }
     if( !is.null(alpha_start) & !is.vector(alpha_start) ){ cat("Error: alpha_start has to be a vector \n") ; return(NULL) }
   if( !is.null(K_max) ){
@@ -296,6 +298,7 @@ MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = 
   }
   if( !is.vector(tolerance) | length(tolerance) != 1 | tolerance <= 0 ){ cat("Error: tolerance has to be greater than 0 \n") ; return(NULL) }
   if( !is.logical(print_error) ){ cat("Error: print_error has to be logical \n") ; return(NULL) }
+  if( !coarse_grid_solver %in% c("Cholesky", "PCG") ){ cat("Error: coarse_grid_solver has to be 'Cholesky' or 'PCG' \n") ; return(NULL) }
   
   
   ### spline setup
@@ -307,7 +310,7 @@ MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = 
   J <- lapply(1:G, function(g) m[[g]]+q+1)        # number of directionla basis functions
   K <- prod(J[[G]])                               # total number of basis functions
   tPhi_list <- lapply(1:G, function(g) lapply(1:P, function(p) t( bspline_matrix(X[,p], m[[g]][p], q[p] ,Omega[[p]]) ) ) )    # spline matrices
-  Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # survature penalty
+  Psi_list <- lapply(1:G, function(g)  curvature_penalty(m[[g]], q, Omega) )   # curvature penalty
   b <- MVP_khatrirao_rcpp(tPhi_list[[G]], y)      # right-hand side vector
   norm_b <- sqrt(sum(b^2))
   
@@ -317,6 +320,25 @@ MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = 
   Rest <- lapply( 2:G, function(g) lapply( 1:P, function(p) restriction_matrix(J[[g]][p],J[[g-1]][p],q[p]) ) )      # restriction matrices
 
   
+  ### Cholesky for coarse grid solver if P not too large
+  U_chol <- F
+  if(coarse_grid_solver == "Cholesky"){
+    tryCatch( {
+      if(P==1){
+        A_coarse <- tcrossprod((tPhi_list[[1]][[1]])) + lambda*Psi_list[[1]][[1]][[1]] #Reduce("+",lapply(1:length(Psi_list[[1]]), function(j) Psi_list[[1]][[j]][[1]]))
+      } else{
+        tPhi_list_sparse_1 <- lapply(1:length(tPhi_list[[1]]), function(i) Matrix::Matrix(tPhi_list[[1]][[i]], sparse = TRUE) )
+        tPhi_sparse <- Reduce(Matrix::KhatriRao, tPhi_list_sparse_1)
+        #TODO: Remove this line
+        #A_coarse <- tPhi_sparse %*% Matrix::t(tPhi_sparse) + lambda*Matrix::Matrix( Reduce("+", lapply( 1:length(Psi_list[[1]]), function(j) rTensor::kronecker_list(Psi_list[[1]][[j]]) ) ), sparse = TRUE )
+        A_coarse <- tPhi_sparse %*% Matrix::t(tPhi_sparse) + lambda*Matrix::Matrix( Reduce("+", lapply( 1:length(Psi_list[[1]]), function(j) Reduce("%x%", Psi_list[[1]][[j]]) ) ), sparse = TRUE )      
+      }
+      U_chol <- chol(A_coarse)
+    }, error = function(e){
+      cat("Warning: Cholesky decomposition not possible - PCG is used as coarse grid solver instead \n")
+    } )
+  }
+
   ### MGCG algorithm
   if( !is.null(alpha_start) ){
     alpha <- alpha_start
@@ -331,7 +353,7 @@ MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = 
     cat("iter  |  error norm", "\n")
     cat(0, "  |  ", sqrt(sum(r^2)) / norm_b, "\n")
   }
-  z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, b, nu, w, alpha)    # apply MG as preconditioner
+  z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, b, nu, U_chol, w, alpha)    # apply MG as preconditioner
   d <- z
   rz <- as.numeric( crossprod(r,z) )
   if(is.null(K_max)){
@@ -348,7 +370,7 @@ MGCG_smooth <- function(G, q, lambda, X, y, w = 0.1, nu = c(3,1), alpha_start = 
     if(sqrt(sum(r^2)) / norm_b <= tolerance){
       break
     }
-    z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, r, nu, w)     # apply MG as preconditioner
+    z <- v_cycle(tPhi_list, Psi_list, Rest, Prol, lambda, r, nu, U_chol, w)     # apply MG as preconditioner
     rz <- crossprod(r,z)
     beta <-  as.numeric( rz / rz_old )
     d <- z + beta*d
